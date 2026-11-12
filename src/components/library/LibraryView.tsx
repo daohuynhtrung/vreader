@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Book, ReadingProgress } from '@/types/reader';
 import { getAllBooks, saveBook, deleteBook, getAllLocalProgress } from '@/lib/storage/db';
 import { extractBookMeta } from '@/lib/parsers/bookParser';
-import { isCloudSyncEnabled, performFullCloudSync } from '@/lib/sync/syncService';
+import { isCloudSyncEnabled, performFullCloudSync, syncBookToCloud, deleteBookFromCloud } from '@/lib/sync/syncService';
 import { createSamplePdfBook } from '@/lib/demo/sampleBook';
 import BookCard from './BookCard';
 import CloudSyncModal from './CloudSyncModal';
@@ -89,6 +89,12 @@ export default function LibraryView({ onOpenBook }: LibraryViewProps) {
         };
 
         await saveBook(newBook, file);
+
+        // Sync to cloud in background (metadata + file upload)
+        if (isCloudSyncEnabled()) {
+          setUploadStatus(`Syncing ${file.name} to cloud...`);
+          syncBookToCloud(newBook, file).catch(console.error);
+        }
       } catch (err) {
         console.error('Failed to process book file:', err);
       }
@@ -104,6 +110,12 @@ export default function LibraryView({ onOpenBook }: LibraryViewProps) {
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this book from your library?')) {
       await deleteBook(id);
+
+      // Delete from cloud in background
+      if (isCloudSyncEnabled()) {
+        deleteBookFromCloud(id).catch(console.error);
+      }
+
       await loadLibrary();
     }
   };

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Book, ReadingProgress, ReaderSettings } from '@/types/reader';
 import { DEFAULT_SETTINGS, THEME_CONFIG } from '@/lib/reader/themeConfig';
 import { getBookBlob, saveLocalProgress, getLocalProgress, getUserSettings, saveUserSettings } from '@/lib/storage/db';
-import { syncProgressToCloud, fetchCloudProgress, isCloudSyncEnabled } from '@/lib/sync/syncService';
+import { syncProgressToCloud, fetchCloudProgress, isCloudSyncEnabled, syncSettingsToCloud, downloadBookFileFromCloud } from '@/lib/sync/syncService';
 import PdfReader from './PdfReader';
 import EpubReader from './EpubReader';
 import ReaderSettingsDrawer from './ReaderSettingsDrawer';
@@ -42,7 +42,13 @@ export default function ReaderShell({ book, onBack }: ReaderShellProps) {
         }
 
         // Load Book Blob from IndexedDB
-        const loadedBlob = book.fileBlob || await getBookBlob(book.id);
+        let loadedBlob = book.fileBlob || await getBookBlob(book.id);
+
+        // If blob not found locally, try downloading from cloud
+        if (!loadedBlob && book.fileKey && isCloudSyncEnabled()) {
+          loadedBlob = await downloadBookFileFromCloud(book.fileKey);
+        }
+
         if (!isCancelled) {
           setBlob(loadedBlob);
         }
@@ -131,6 +137,12 @@ export default function ReaderShell({ book, onBack }: ReaderShellProps) {
     setSettings((prev) => {
       const updated = { ...prev, ...newPartial };
       saveUserSettings(updated).catch(console.error);
+
+      // Sync settings to cloud in background
+      if (isCloudSyncEnabled()) {
+        syncSettingsToCloud(updated).catch(console.error);
+      }
+
       return updated;
     });
   };

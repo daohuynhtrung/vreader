@@ -18,8 +18,9 @@
   - Custom font size scaling, line spacing, and margin padding.
 - 🔄 **Cross-Device Sync**:
   - Automatically saves your reading position as you read.
-  - Open the same book from another device (phone, tablet, computer) and pick up right where you left off.
-  - Powered by **Supabase Free Tier** (PostgreSQL) with zero-cost hosting on Vercel or Cloudflare Pages.
+  - **Full library sync**: book metadata, files, reading progress, and reader settings are all synced to the cloud.
+  - Open the same book from another device (phone, tablet, computer) and pick up right where you left off — the book file is downloaded automatically.
+  - Powered by **Supabase Free Tier** (PostgreSQL + Storage) with zero-cost hosting on Vercel or Cloudflare Pages.
 - 💾 **Local Offline Storage**:
   - Uses browser **IndexedDB** so uploaded books and reading positions work seamlessly even offline.
 - 📲 **PWA Ready**:
@@ -35,7 +36,7 @@
 | **Styling** | Tailwind CSS v4, Lucide Icons | Free |
 | **Reading Engines** | `epubjs` (EPUB) & `pdfjs-dist` (PDF) | Open Source |
 | **Local Storage** | Browser IndexedDB (`idb`) | Free |
-| **Database & Sync** | Supabase (PostgreSQL) | Free tier (50,000 MAU, 500MB DB) |
+| **Database & Sync** | Supabase (PostgreSQL + Storage) | Free tier (50,000 MAU, 500MB DB, 1GB Storage) |
 | **Hosting** | Vercel or Cloudflare Pages | Free tier |
 
 ---
